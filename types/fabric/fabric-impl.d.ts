@@ -1364,7 +1364,70 @@ interface ICanvasOptions extends IStaticCanvasOptions {
 	 */
 	isDrawingMode?: boolean;
 }
-export interface Canvas extends StaticCanvas { }
+export interface Canvas extends StaticCanvas { 
+	lowerCanvasEl: HTMLCanvasElement;
+	contextContainer: CanvasRenderingContext2D;
+	viewportTransform: any;
+
+	_createCanvasElement(): HTMLCanvasElement;
+
+	/**
+     * Helper for setting width/height
+     * @protected
+     * @param {String} prop property (width|height)
+     * @param {Number} value value to set property to
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+	_setBackstoreDimension(prop: string, value: number): void;
+
+    /**
+     * Helper for setting css width/height
+     * @protected
+     * @param {String} prop property (width|height)
+     * @param {String} value value to set property to
+     * @return {fabric.Canvas} instance
+     * @chainable true
+     */
+	_setCssDimension(prop: string, value: number): void;
+   
+	/**
+     * @protected
+     * Handle event firing for target and subtargets
+     * @param {Event} e event from mouse
+     * @param {String} eventType event to fire (up, down or move)
+     * @param {fabric.Object} targetObj receiving event
+     * @param {Number} [button] button used in the event 1 = left, 2 = middle, 3 = right
+     * @param {Boolean} isClick for left button only, indicates that the mouse up happened without move.
+     */
+	_handleEvent(e: Event, eventType: string, targetObj?: fabric.Object, button?: number, isClick?: boolean): void;
+
+	/**
+	 * Callback of on mouse out.
+	 * @protected
+	 * 
+	 * @param {Event} e Event object fired on mousedout
+	 */
+	_onMouseOut(e: Event): void;
+
+	/**
+     * @protected
+     * @param {Event} e Event object fired on mousemove
+     */
+	_onMouseMoveInDrawingMode(e: Event): void;
+
+	/**
+     * @protected
+     * @param {Event} e Event object fired on mousedown
+     */
+	_onMouseDownInDrawingMode(e: Event): void;
+	
+	/**
+     * @protected
+     * @param {Event} e Event object fired on mouseup
+     */
+    _onMouseUpInDrawingMode(e: Event): void;
+}
 export interface Canvas extends ICanvasOptions { }
 export class Canvas {
 	/**
@@ -1374,7 +1437,39 @@ export class Canvas {
 	 */
 	constructor(element: HTMLCanvasElement | string, options?: ICanvasOptions);
 
+	/**
+	 * The div element contains canvases.
+	 */
+	wrapperEl: HTMLElement;
+
+	/**
+	 * The upper canvas element which draws selection, brush.
+	 */
+	upperCanvasEl: HTMLCanvasElement;
+
+	/**
+	 * The brush to drawing track.
+	 */
+	freeDrawingBrush: BaseBrush;
+
+	/**
+	 * Indicates current is drawing action with mouse move event.
+	 */
+	_isCurrentlyDrawing: boolean;
+
 	_objects: Object[];
+
+	/**
+	 * Copy canvas style
+	 */
+	_copyCanvasStyle(fromEl: HTMLElement, toEl: HTMLElement): void;
+
+	/**
+	 * Apply canvas style to element.
+	 * 
+	 * @param element 
+	 */
+	_applyCanvasStyle(element: HTMLElement): void;
 
 	/**
 	 * Checks if point is contained within an area of given object
@@ -2737,7 +2832,14 @@ interface IPathOptions extends IObjectOptions {
 	 */
 	minY?: number;
 }
-export interface Path extends Object, IPathOptions { }
+export interface Path extends Object, IPathOptions {
+	left: number;
+	width: number;
+	height: number;
+	top: number;
+	bottom: number;
+
+ }
 export class Path {
 	/**
 	 * Constructor
@@ -2798,6 +2900,8 @@ export class Path {
 	 * @param callback Callback to invoke when an fabric.Path instance is created
 	 */
 	static fromObject(object: any, callback: (path: Path) => any): void;
+
+	translateToGivenOrigin(point: fabric.Point, fromOriginX: string, fromOriginY: string, toOriginX: string, toOriginY: string):  fabric.Path;
 }
 
 export class PathGroup extends Object {

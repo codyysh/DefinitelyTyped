@@ -799,6 +799,7 @@ interface IShadowOptions {
 }
 export interface Shadow extends IShadowOptions { }
 export class Shadow {
+	affectStroke: boolean;	
 	constructor(options?: IShadowOptions);
 	initialize(options?: IShadowOptions | string): Shadow;
 	/**
@@ -922,7 +923,7 @@ interface IStaticCanvasOptions {
 	 */
 	stateful?: boolean;
 }
-export interface StaticCanvas extends IObservable<StaticCanvas>, IStaticCanvasOptions, ICollection<StaticCanvas>, ICanvasAnimation<StaticCanvas> { }
+export interface StaticCanvas extends ICommonMethod, IObservable<StaticCanvas>, IStaticCanvasOptions, ICollection<StaticCanvas>, ICanvasAnimation<StaticCanvas> { }
 export class StaticCanvas {
 	/**
 	 * Constructor
@@ -2350,7 +2351,68 @@ interface IObjectOptions {
 	 */
 	data?: any;
 }
-export interface Object extends IObservable<Object>, IObjectOptions, IObjectAnimation<Object> { }
+
+export interface ICommonMethod {
+  /**
+   * Sets object's properties from options
+   * @param {Object} [options] Options object
+   */
+  _setOptions(options: any): void;
+
+//   /**
+//    * @private
+//    * @param {Object} [filler] Options object
+//    * @param {String} [property] property to set the Gradient to
+//    */
+//   _initGradient(filler: any, property: string): void;
+
+//   /**
+//    * @private
+//    * @param {Object} [filler] Options object
+//    * @param {String} [property] property to set the Pattern to
+//    * @param {Function} [callback] callback to invoke after pattern load
+//    */
+//   _initPattern(filler: any, property: string, callback: Function): void;
+
+//   /**
+//    * @private
+//    * @param {Object} [options] Options object
+//    */
+//   _initClipping(options: any): void;
+
+//   /**
+//    * @private
+//    */
+//   _setObject(obj: any): void;
+
+  /**
+   * Sets property to a given value. When changing position/dimension -related properties (left, top, scale, angle, etc.) `set` does not update position of object's borders/controls. If you need to update those, call `setCoords()`.
+   * @param {String|Object} key Property name or object (if object, iterate over the object properties)
+   * @param {Object|Function} value Property value (if function, the value is passed into it and its return value is used as a new one)
+   * @return {fabric.Object} thisArg
+   * @chainable
+   */
+  set(key: any, value?: any): Object;
+
+  _set(key: any, value: any): void;
+
+  /**
+   * Toggles specified property from `true` to `false` or from `false` to `true`
+   * @param {String} property Property to toggle
+   * @return {fabric.Object} thisArg
+   * @chainable
+   */
+  toggle(property: string): Object;
+
+  /**
+   * Basic getter
+   * @param {String} property Property name
+   * @return {*} value of a property
+   */
+  get(property: string): any;
+}
+
+export interface Object extends IObservable<Object>, IObjectOptions, IObjectAnimation<Object>, ICommonMethod { }
 export class Object {
 	getCurrentWidth(): number;
 	getCurrentHeight(): number;
@@ -2766,11 +2828,16 @@ export class Object {
 	 * See https://github.com/kangax/fabric.js/wiki/When-to-call-setCoords
 	 */
 	setCoords(): this;
+	
 	/**
-	 * Returns coordinates of object's bounding rectangle (left, top, width, height)
-	 * @return Object with left, top, width, height properties
+     * Returns coordinates of object's bounding rectangle (left, top, width, height)
+     * the box is intented as aligned to axis of canvas.
+     * @param {Boolean} [absolute] use coordinates without viewportTransform
+     * @param {Boolean} [calculate] use coordinates of current position instead of .oCoords / .aCoords
+     * @return {Object} Object with left, top, width, height properties
 	 */
-	getBoundingRect(): { left: number; top: number; width: number; height: number };
+	getBoundingRect(absolute?: boolean, calculate?: boolean): { left: number; top: number; width: number; height: number };
+
 	/**
 	 * Checks if object is fully contained within area of another object
 	 * @param other Object to test
@@ -2901,7 +2968,7 @@ export class Path {
 	 */
 	static fromObject(object: any, callback: (path: Path) => any): void;
 
-	translateToGivenOrigin(point: fabric.Point, fromOriginX: string, fromOriginY: string, toOriginX: string, toOriginY: string):  fabric.Path;
+	translateToGivenOrigin(point: fabric.Point, fromOriginX: string, fromOriginY: string, toOriginX: string, toOriginY: string):  fabric.Point;
 }
 
 export class PathGroup extends Object {
